@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import Todos from './components/Todos';
 import { TODO_FILTERS } from './conts';
+import Footer from './components/Footer';
+import Header from './components/Header';
+import { type TodoTitle } from './types';
 
 const mockTodos = [
   { id: '1', title: 'Ir a comprar la cena', completed: false },
@@ -10,7 +13,9 @@ const mockTodos = [
 
 function App(): JSX.Element {
   const [todos, setTodos] = useState(mockTodos);
-  const [filterSelected, setFilterSelected] = useState(TODO_FILTERS.ALL);
+  const [filterSelected, setFilterSelected] = useState<
+    (typeof TODO_FILTERS)[keyof typeof TODO_FILTERS]
+  >(TODO_FILTERS.ALL);
 
   const handleRemove = (id: string): void => {
     const newTodos = todos.filter((todo) => todo.id != id);
@@ -31,16 +36,51 @@ function App(): JSX.Element {
 
   const handlesFilterChange = (
     filter: (typeof TODO_FILTERS)[keyof typeof TODO_FILTERS],
-  ) => {};
+  ): void => {
+    setFilterSelected(filter);
+  };
+
+  const filteredTodos = todos.filter((todo) => {
+    if (filterSelected === TODO_FILTERS.ACTIVE) return !todo.completed;
+    if (filterSelected === TODO_FILTERS.COMPLETED) return todo.completed;
+    return todo;
+  });
+
+  const handleRemoveAllCompleted = (): void => {
+    const newTodos = todos.filter((todo) => !todo.completed);
+    setTodos(newTodos);
+  };
+
+  const handleAddTodo = ({ title }: TodoTitle): void => {
+    const newTodo = {
+      id: crypto.randomUUID(),
+      title,
+      completed: false,
+    };
+
+    const newTodos = [...todos, newTodo];
+
+    setTodos(newTodos);
+  };
+
+  const activeCount = todos.filter((todo) => !todo.completed).length;
+  const completedCount = todos.length - activeCount;
 
   return (
     <>
       <div className="todoapp">
-        {' '}
+        <Header onAddTodo={handleAddTodo} />{' '}
         <Todos
           onRemoveTodo={handleRemove}
-          todos={todos}
+          todos={filteredTodos}
           onHandleCompleted={hanldleCompleted}
+        />
+        <Footer
+          activeCount={activeCount}
+          completedCount={completedCount}
+          filterSelected={filterSelected}
+          onClearCompleted={handleRemoveAllCompleted}
+          handleFilterChange={handlesFilterChange}
         />
       </div>
     </>
