@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Todos from './components/Todos';
+import { TODO_FILTERS } from './conts';
 
 const mockTodos = [
   { id: '1', title: 'Ir a comprar la cena', completed: false },
@@ -9,6 +10,7 @@ const mockTodos = [
 
 function App(): JSX.Element {
   const [todos, setTodos] = useState(mockTodos);
+  const [filterSelected, setFilterSelected] = useState(TODO_FILTERS.ALL);
 
   const handleRemove = (id: string): void => {
     const newTodos = todos.filter((todo) => todo.id != id);
@@ -26,6 +28,10 @@ function App(): JSX.Element {
 
     setTodos(newTodos);
   };
+
+  const handlesFilterChange = (
+    filter: (typeof TODO_FILTERS)[keyof typeof TODO_FILTERS],
+  ) => {};
 
   return (
     <>
